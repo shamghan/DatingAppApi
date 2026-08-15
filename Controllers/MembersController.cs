@@ -10,7 +10,7 @@ namespace DatingApp.Controllers
 {
     [Route("api/[controller]")] //localhost/api/member
     [ApiController]
-    public class MembersController(AppDbContext Context) : ControllerBase
+    public class MembersController(AppDbContext Context) : BaseApiController
     {
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<AppUser>>> GetMembers()
@@ -27,4 +27,5 @@ namespace DatingApp.Controllers
         }
         
     }
+
 }
