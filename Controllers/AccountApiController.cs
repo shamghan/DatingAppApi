@@ -1,6 +1,7 @@
 ﻿using DatingApp.Data;
 using DatingApp.DTO;
 using DatingApp.Entities;
+using DatingAppApi.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -27,6 +28,21 @@ namespace DatingApp.Controllers
             };
             context.Users.Add(user);
             await context.SaveChangesAsync();
+
+            return user;
+        }
+        [HttpPost("login")]
+        public async Task<ActionResult<AppUser>> Login(LoginDto loginDto)
+        {
+            var user= await context.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
+            if (user == null) return Unauthorized("Invalid Email");
+            using var hmac= new HMACSHA512(user.PasswordSalt);
+            var computedHash =hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+            for (int i = 0; i < computedHash.Length; i++)
+            {
+                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid Password");
+            }
+
 
             return user;
         }
