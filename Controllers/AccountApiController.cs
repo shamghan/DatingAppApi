@@ -2,6 +2,7 @@
 using DatingApp.DTO;
 using DatingApp.Entities;
 using DatingAppApi.DTO;
+using DatingAppApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -11,11 +12,11 @@ namespace DatingApp.Controllers
 {
     [Route("api/[Controller]")]
     [ApiController]
-    public class AccountController(AppDbContext context) : BaseApiController
+    public class AccountController(AppDbContext context,ITokenService tokenService) : BaseApiController
     {
 
         [HttpPost("register")]
-        public async Task<ActionResult<AppUser>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if (await EmailExists(registerDto.Email)) return BadRequest("Email Taken");
             var hmac = new HMACSHA512();
@@ -29,10 +30,16 @@ namespace DatingApp.Controllers
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            return user;
+             return new UserDto
+            {
+                Id = user.Id,
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                Token = tokenService.CreateToken(user)
+            };
         }
         [HttpPost("login")]
-        public async Task<ActionResult<AppUser>> Login(LoginDto loginDto)
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user= await context.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
             if (user == null) return Unauthorized("Invalid Email");
@@ -44,7 +51,13 @@ namespace DatingApp.Controllers
             }
 
 
-            return user;
+            return new UserDto
+            {
+                Id = user.Id,
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                Token = tokenService.CreateToken(user)
+            };
         }
         private async Task<bool> EmailExists(string email)
         {
