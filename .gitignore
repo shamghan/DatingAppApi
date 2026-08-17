@@ -428,3 +428,6 @@ FodyWeavers.xsd
 *.msm
 *.msp
 *.db
+dating.db-shm
+.gitignore
+dating.db-wal
