@@ -14,6 +14,7 @@ namespace DatingApp.Controllers
     [ApiController]
     public class MembersController(AppDbContext Context) : BaseApiController
     {
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<AppUser>>> GetMembers()
         {
