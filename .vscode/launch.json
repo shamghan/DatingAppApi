@@ -8,7 +8,7 @@
           "name": "C#: API Debug",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/DatingApp.csproj"
+            "projectPath": "${workspaceFolder}/DatingApp/DatingApp.csproj"
             },
             {
                 "name": ".NET Core Attach",
