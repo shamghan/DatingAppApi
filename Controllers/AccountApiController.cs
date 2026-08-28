@@ -15,7 +15,16 @@ namespace DatingApp.Controllers
     [ApiController]
     public class AccountController(AppDbContext context,ITokenService tokenService) : BaseApiController
     {
-
+        [HttpPost("{email}")]
+        public async Task<ActionResult<UserDto>> Delete(string email)
+        {
+            
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null) return NotFound("User not found");
+            context.Users.Remove(user);
+            await context.SaveChangesAsync();
+            return Ok("User deleted successfully");
+        }
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
