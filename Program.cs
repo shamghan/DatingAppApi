@@ -4,6 +4,7 @@ using DatingAppApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using DatingAppApi.Middleware;
+using DatingAppApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,4 +51,18 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+using var scope = app.Services.CreateScope();
+
+var services = scope.ServiceProvider;
+try
+{
+    var context = services.GetRequiredService<AppDbContext>();
+    await context.Database.MigrateAsync();
+    await Seed.SeedUser(context);
+}
+catch(System.Exception ex)
+{
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex.Message, "An error occured during migration");
+}
 app.Run();
