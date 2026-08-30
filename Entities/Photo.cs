@@ -1,0 +1,24 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace DatingAppApi.Entities
+{
+    public class Photo
+    {
+        public int Id { get; set; }
+        public required string Url { get; set; }
+        public string? PublicId { get; set; }
+
+        // //navigation property
+        [JsonIgnore]
+        public Member Member { get; set; } = null!;
+
+        public string MemberId { get; set; } = null!;
+        public bool IsApproved { get; set; }
+
+
+    }
+}
