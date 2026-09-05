@@ -41,14 +41,14 @@ namespace DatingAppApi.Data
         }
 
 
-        // public async Task<Member?> GetMemberForUpdate(string id)
-        // {
-        //     return await context.Members
-        //         .Include(x => x.User)
-        //         .Include(x => x.Photos)
-        //         .IgnoreQueryFilters()
-        //         .SingleOrDefaultAsync(x => x.Id == id);
-        // }
+        public async Task<Member?> GetMemberForUpdate(string id)
+        {
+            return await context.Members
+                .Include(x => x.User)
+                .Include(x => x.Photos)
+                .IgnoreQueryFilters()
+                .SingleOrDefaultAsync(x => x.Id == id);
+        }
 
         // public async Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams)
         // {
