@@ -39,7 +39,7 @@ namespace DatingAppApi.Data
                     PasswordSalt = hmac.Key,
                     Member= new Member{
                         Id= member.Id,
-                        DsiplayName = member.DisplayName,
+                        DisplayName = member.DisplayName,
                         Description= member.Description,
                         DateOfBirth= member.DateOfBirth,
                         ImageUrl = member.ImageUrl,
