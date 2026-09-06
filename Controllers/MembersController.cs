@@ -17,7 +17,7 @@ namespace DatingApp.Controllers
     [Authorize]
     [Route("api/[controller]")] //localhost/api/member
     [ApiController]
-    public class MembersController(IMemberRepository memberRepository) : BaseApiController
+    public class MembersController(IMemberRepository memberRepository, IPhotoService _photoService) : BaseApiController
     {
        
         [HttpGet]
@@ -33,12 +33,12 @@ namespace DatingApp.Controllers
             if (member is null) return NotFound();
             return member;
         }
-        [HttpGet("{id}/photos")]
+        [HttpGet("{id}/photos")] //localhost/api/member/id/photos
         public async Task<ActionResult<IReadOnlyList<Photo>>> GetMemberPhotos(string id)
         {
             return  Ok(await memberRepository.GetPhotosForMemberAsync(id));
         }
-        [HttpPut]
+        [HttpPut] //localhost/api/member
         public async Task<ActionResult> UpdateMember(MemberUpdateDto updateDto)
         {
             var memberId = User.GetMemberId();
@@ -56,6 +56,29 @@ namespace DatingApp.Controllers
             if(await memberRepository.SaveAllAsync()) return NoContent();
             return BadRequest("Failed to update member");
         }
-    }
+        [HttpPost("add-photo")]
+        public async Task<ActionResult<Photo>> AddPhoto([FromForm]IFormFile file)
+        {
+            var member = await memberRepository.GetMemberForUpdate(User.GetMemberId());
+            if (member is null) return NotFound("Member not found");
 
+            var result = await _photoService.UploadPhotoAsync(file);
+            if (result.Error is not null) return BadRequest(result.Error.Message);
+            var photo = new Photo
+            {
+                Url = result.SecureUrl.AbsoluteUri,
+                PublicId = result.PublicId,
+                MemberId = User.GetMemberId()
+            };
+            if(member.Photos == null)
+            {
+                member.ImageUrl = photo.Url;
+                member.User.ImageUrl = photo.Url;
+            }
+            member.Photos.Add(photo);
+            if (await memberRepository.SaveAllAsync()) return photo;
+            
+            return BadRequest("Problem adding photo");
+        }
+    }
 }
