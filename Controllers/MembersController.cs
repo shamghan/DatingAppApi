@@ -19,7 +19,7 @@ namespace DatingApp.Controllers
     [ApiController]
     public class MembersController(IMemberRepository memberRepository, IPhotoService _photoService) : BaseApiController
     {
-       
+
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers()
         {
@@ -43,7 +43,7 @@ namespace DatingApp.Controllers
         {
             var memberId = User.GetMemberId();
             if (memberId is null) return NotFound("No id found in token");
-            
+
             var member = await memberRepository.GetMemberForUpdate(memberId);
             if(member is null) return NotFound("Member not found");          
 
@@ -77,8 +77,27 @@ namespace DatingApp.Controllers
             }
             member.Photos.Add(photo);
             if (await memberRepository.SaveAllAsync()) return photo;
-            
+
             return BadRequest("Problem adding photo");
         }
+
+        [HttpPut("set-main-photo/{photoId}")]
+        public async Task<ActionResult> SetMainPhoto(int photoId)
+        {
+            var member = await memberRepository.GetMemberForUpdate(User.GetMemberId());
+            if (member == null) return BadRequest("Can not get meber from token");
+
+            var photo = member.Photos.SingleOrDefault(p => p.Id == photoId);
+            if (member.ImageUrl == photo?.Url || photo == null)
+            {
+                return BadRequest("Can not set this as main image");
+            }
+            member.ImageUrl =  photo.Url;
+            member.User.ImageUrl =  photo.Url;
+            if(await memberRepository.SaveAllAsync()) return NoContent();
+
+            return BadRequest("Problem setting main photo");
+        }
+
     }
 }
