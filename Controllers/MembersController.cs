@@ -4,6 +4,7 @@ using DatingAppApi.DTO;
 using DatingAppApi.Entities;
 using DatingAppApi.Extensions;
 using DatingAppApi.Interfaces;
+using DatingAppApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -97,6 +98,28 @@ namespace DatingApp.Controllers
             if(await memberRepository.SaveAllAsync()) return NoContent();
 
             return BadRequest("Problem setting main photo");
+        }
+        [HttpDelete("delete-photo/{photoId}")]
+        public async Task<ActionResult> DeletePhoto(int photoId)
+        {
+            var member = await memberRepository.GetMemberForUpdate(User.GetMemberId());
+            if (member == null) return BadRequest("Can not get meber from token");
+
+            var photo = member.Photos.SingleOrDefault(p => p.Id == photoId);
+
+            if(photo== null || photo.Url == member.ImageUrl)
+                return BadRequest("This phot can not be deleted");
+            
+            if(photo.PublicId != null)
+            {
+                var result = await _photoService.DeletePhotoAsync(photo.PublicId);
+                if(result.Error != null) return BadRequest(result.Error.Message);
+            }
+
+            member.Photos.Remove(photo);
+            if(await memberRepository.SaveAllAsync()) return Ok();
+
+            return BadRequest("Problem deleting the photo");
         }
 
     }
