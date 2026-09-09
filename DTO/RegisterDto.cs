@@ -12,5 +12,11 @@ namespace DatingApp.DTO
         [Required]
         [MinLength(4)]
         public string Password { get; set; } = "";
+
+        [Required]
+        public string? Gender {get; set;} = string.Empty;
+        public DateOnly DateOfBirth {get; set;} 
+        public string? City {get; set;} = string.Empty;
+        public string? Country {get; set;} = string.Empty;
     }
 }

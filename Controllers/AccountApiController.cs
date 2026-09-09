@@ -2,6 +2,7 @@
 using DatingApp.DTO;
 using DatingApp.Entities;
 using DatingAppApi.DTO;
+using DatingAppApi.Entities;
 using DatingAppApi.Extensions;
 using DatingAppApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,14 @@ namespace DatingApp.Controllers
                 DisplayName = registerDto.DisplayName,
                 Email = registerDto.Email,
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key
+                PasswordSalt = hmac.Key,
+                Member = new Member
+                {
+                    DisplayName = registerDto.DisplayName,
+                    Gender = registerDto.Gender,
+                    City = registerDto.City,
+                    Country = registerDto.Country,
+                }
             };
             context.Users.Add(user);
             await context.SaveChangesAsync();
