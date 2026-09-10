@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DatingApp.Data;
 using DatingAppApi.Entities;
+using DatingAppApi.Helpers;
 using DatingAppApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,9 +22,10 @@ namespace DatingAppApi.Data
         {
             return await context.SaveChangesAsync() > 0;
         }
-        public async Task<IReadOnlyList<Member>> GetMembersAsync()
+        public async Task<PaginatedResult<Member>> GetMembersAsync(PagingParams pagingParams)
         {
-            return await context.Members.ToListAsync();
+            var query= context.Members.AsQueryable();// as  its IQueryable so it does not do  anything with database
+            return await PaginationHelper.CreateAsync(query, pagingParams.PageNumber, pagingParams.PageSize);
         }
         public async Task<Member?> GetMemberByIdAsync(string id)
         {

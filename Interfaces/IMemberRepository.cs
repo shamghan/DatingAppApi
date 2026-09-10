@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DatingAppApi.Entities;
+using DatingAppApi.Helpers;
 
 namespace DatingAppApi.Interfaces
 {
@@ -10,7 +11,7 @@ namespace DatingAppApi.Interfaces
     {
         void Update(Member member);
         Task<bool> SaveAllAsync();
-        Task<IReadOnlyList<Member>> GetMembersAsync();
+        Task<PaginatedResult<Member>> GetMembersAsync(PagingParams pagingParams);
         Task<Member?> GetMemberByIdAsync(string id);
         Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId);
         Task<Member?> GetMemberForUpdate(string id);

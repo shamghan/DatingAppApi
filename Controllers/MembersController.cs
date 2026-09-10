@@ -3,6 +3,7 @@ using DatingApp.Entities;
 using DatingAppApi.DTO;
 using DatingAppApi.Entities;
 using DatingAppApi.Extensions;
+using DatingAppApi.Helpers;
 using DatingAppApi.Interfaces;
 using DatingAppApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,9 +23,9 @@ namespace DatingApp.Controllers
     {
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers()
+        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers([FromQuery]PagingParams pagingParams)
         {
-            var members = await memberRepository.GetMembersAsync();
+            var members = await memberRepository.GetMembersAsync(pagingParams);
             return Ok(members);
         }
         [HttpGet("{id}")] //localhost/api/member/id
