@@ -23,9 +23,10 @@ namespace DatingApp.Controllers
     {
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers([FromQuery]PagingParams pagingParams)
+        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers([FromQuery]MemberParams memberParams)
         {
-            var members = await memberRepository.GetMembersAsync(pagingParams);
+            memberParams.CurrentMemberId = User.GetMemberId();
+            var members = await memberRepository.GetMembersAsync(memberParams);
             return Ok(members);
         }
         [HttpGet("{id}")] //localhost/api/member/id
