@@ -1,6 +1,7 @@
 ﻿using DatingApp.Entities;
 using DatingAppApi.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DatingApp.Data
 {
@@ -10,5 +11,28 @@ namespace DatingApp.Data
 
         public DbSet<Member> Members { get; set;}
         public DbSet<Photo> Photos { get; set;}
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            var dateTimeConverter = new ValueConverter<DateTime,DateTime>(
+                v=> v.ToUniversalTime(),
+                v=> DateTime.SpecifyKind(v, DateTimeKind.Utc)
+
+            );
+
+            foreach(var enttyTyp in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach(var property in enttyTyp.GetProperties())
+                {
+                    if(property.ClrType == typeof(DateTime))
+                    {
+                        property.SetValueConverter(dateTimeConverter);
+                    }
+                }
+            }
+        }
+
     }
 }
