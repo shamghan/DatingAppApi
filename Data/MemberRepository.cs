@@ -33,7 +33,11 @@ namespace DatingAppApi.Data
             var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MaxAge-1));
             var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MinAge));
             query = query.Where(x=>x.DateOfBirth>= minDob && x.DateOfBirth<=maxDob);
-
+            query = memberParams.Orderby switch
+            {
+                "created" => query.OrderByDescending(x=>x.Created),
+                _ => query.OrderByDescending(x=>x.LastActive)
+            };
             
             return await PaginationHelper.CreateAsync(query, memberParams.PageNumber, memberParams.PageSize);
         }
