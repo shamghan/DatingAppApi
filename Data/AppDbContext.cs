@@ -11,25 +11,10 @@ namespace DatingApp.Data
 
         public DbSet<Member> Members { get; set;}
         public DbSet<Photo> Photos { get; set;}
-        public DbSet<MemberLike> Likes { get; set;}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<MemberLike>()
-                .HasKey(e => new {e.SourceMemberId, e.TargetMemberid});
-
-            modelBuilder.Entity<MemberLike>()
-            .HasOne(e => e.SourceMember)
-            .WithMany(e => e.LikedMembers)
-            .HasForeignKey(e => e.SourceMemberId)
-            .OnDelete(DeleteBehavior.Cascade);
-            
-            modelBuilder.Entity<MemberLike>()
-            .HasOne(e => e.TargetMember)
-            .WithMany(e => e.LikedByMembers)
-            .HasForeignKey(e => e.TargetMemberid)
-            .OnDelete(DeleteBehavior.NoAction);
 
             var dateTimeConverter = new ValueConverter<DateTime,DateTime>(
                 v=> v.ToUniversalTime(),
