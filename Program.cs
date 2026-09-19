@@ -23,6 +23,8 @@ builder.Services.AddCors();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<ILikeRepository, LikesRepository>();
+
 builder.Services.Configure<CaludinarySettings>(builder.Configuration.GetSection("CaludinarySettings"));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
