@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DatingApp.Controllers;
 using DatingAppApi.Entities;
 using DatingAppApi.Extensions;
+using DatingAppApi.Helpers;
 using DatingAppApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -43,9 +44,10 @@ namespace DatingAppApi.Controllers
             return Ok(await likesRepository.GetCurrentMemberLikeIds(User.GetMemberId()));
         }
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Member>>> GetmemberLikes(string predicate)
+        public async Task<ActionResult<PaginatedResult<Member>>> GetmemberLikes([FromQuery] LikesParam param)
         {
-            var members = await likesRepository.GetMemberLikes(predicate, User.GetMemberId());
+            param.MemberId = User.GetMemberId();
+            var members = await likesRepository.GetMemberLikes(param);
             return Ok(members);
         } 
     }
