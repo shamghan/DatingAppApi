@@ -31,8 +31,10 @@ namespace DatingAppApi.Entities
         public List<MemberLike> LikedByMembers {get; set;} =[];
         [JsonIgnore]
         public List<MemberLike> LikedMembers {get; set;} =[];
-
-
+        [JsonIgnore]
+        public List<Message> MessageSent {get; set;} = [];
+        [JsonIgnore]
+        public List<Message> MessageRecieved {get; set;} = [];
 
     }
 }

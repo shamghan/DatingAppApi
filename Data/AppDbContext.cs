@@ -12,10 +12,21 @@ namespace DatingApp.Data
         public DbSet<Member> Members { get; set;}
         public DbSet<Photo> Photos { get; set;}
         public DbSet<MemberLike> Likes { get; set;}
+        public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Message>()
+                .HasOne(e => e.Sender)
+                .WithMany(e => e.MessageSent)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(e => e.Sender)
+                .WithMany(e => e.MessageSent)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<MemberLike>()
                 .HasKey(e => new {e.SourceMemberId, e.TargetMemberid});
 
