@@ -6,6 +6,7 @@ using DatingApp.Controllers;
 using DatingAppApi.DTO;
 using DatingAppApi.Entities;
 using DatingAppApi.Extensions;
+using DatingAppApi.Helpers;
 using DatingAppApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,6 +37,18 @@ namespace DatingAppApi.Controllers
                 return Ok(message.ToDto());
 
             return BadRequest("Failed to send message");   
+        }
+        [HttpGet]
+        public async Task<ActionResult<PaginatedResult<MessageDto>>> GetMessageByIdAsync([FromQuery]MessageParam param)
+        {
+            param.MemberId = User.GetMemberId();
+            return await messageRepository.GetMessagesForMember(param);
+        }
+        [HttpGet("thread/{recipientId}")]
+        public async Task<ActionResult<IReadOnlyList<MessageDto>>> GetMessageThread(string recipientId)
+        {
+            var currentMemberId = User.GetMemberId();
+            return Ok(await messageRepository.GetMessageThread(currentMemberId, recipientId));
         }
     }
 }

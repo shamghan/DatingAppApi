@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using DatingApp.Data;
 using DatingAppApi.DTO;
 using DatingAppApi.Entities;
+using DatingAppApi.Extensions;
 using DatingAppApi.Helpers;
 using DatingAppApi.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppApi.Data
 {
@@ -27,14 +29,31 @@ namespace DatingAppApi.Data
             return await context.Messages.FindAsync(messageId);
         }
 
-        public async Task<PaginatedResult<MessageDto>> GetMessagesForMember()
+        public async Task<PaginatedResult<MessageDto>> GetMessagesForMember(MessageParam param)
         {
-            throw new NotImplementedException();
+            var query = context.Messages.OrderByDescending(m => m.MessageSent).AsQueryable();
+
+            query = param.Container switch
+            {
+                "Outbox" => query.Where(m => m.SenderId == param.MemberId),
+                _ => query.Where(m => m.RecipientId == param.MemberId)
+            };
+            var messageQuery = query.Select(MessageExtension.ToDtoProjectio());
+            return await PaginationHelper.CreateAsync(messageQuery, param.PageNumber, param.PageSize);
         }
 
-        public async Task<IReadOnlyList<MessageDto>> GetMessageThread(string currentMemberId, string recipientMemberId)
+        public async Task<IReadOnlyList<MessageDto>> GetMessageThread(string currentMemberId, string recipientId)
         {
-            throw new NotImplementedException();
+            await context.Messages
+                .Where(m => m.RecipientId == currentMemberId && m.SenderId == recipientId
+                || m.DateRead == null)
+                .ExecuteUpdateAsync(m => m.SetProperty(m => m.DateRead, DateTime.UtcNow));
+            return  await context.Messages
+                .Where(m => m.RecipientId == currentMemberId && m.SenderId == recipientId
+                ||(m.SenderId == currentMemberId && m.RecipientId == recipientId))
+                .OrderBy(m => m.MessageSent)
+                .Select(MessageExtension.ToDtoProjectio())
+                .ToListAsync();
         }
 
         public async Task<bool> SaveAllChanges()

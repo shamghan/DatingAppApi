@@ -13,7 +13,7 @@ namespace DatingAppApi.Interfaces
         void AddMessage (Message message);
         void DeleteMessage (Message message);
         Task<Message?> GetMessage(string messageId);
-        Task<PaginatedResult<MessageDto>> GetMessagesForMember();
+        Task<PaginatedResult<MessageDto>> GetMessagesForMember(MessageParam param);
         Task<IReadOnlyList<MessageDto>> GetMessageThread(string currentMemberId, string recipientMemberId);
         Task<bool> SaveAllChanges();
     }

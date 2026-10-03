@@ -42,10 +42,9 @@ namespace DatingApp.Data
             .HasForeignKey(e => e.TargetMemberid)
             .OnDelete(DeleteBehavior.NoAction);
 
-            var dateTimeConverter = new ValueConverter<DateTime,DateTime>(
-                v=> v.ToUniversalTime(),
-                v=> DateTime.SpecifyKind(v, DateTimeKind.Utc)
-
+            var nullableDateTimeConverter = new ValueConverter<DateTime?,DateTime?>(
+                v=> v.HasValue ? v.Value.ToUniversalTime() : null,
+                v=> v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : null
             );
 
             foreach(var enttyTyp in modelBuilder.Model.GetEntityTypes())
@@ -54,7 +53,11 @@ namespace DatingApp.Data
                 {
                     if(property.ClrType == typeof(DateTime))
                     {
-                        property.SetValueConverter(dateTimeConverter);
+                        property.SetValueConverter(nullableDateTimeConverter);
+                    }
+                    else if(property.ClrType == typeof(DateTime?))
+                    {
+                        property.SetValueConverter(nullableDateTimeConverter);    
                     }
                 }
             }
