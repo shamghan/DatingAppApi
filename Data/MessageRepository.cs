@@ -35,8 +35,8 @@ namespace DatingAppApi.Data
 
             query = param.Container switch
             {
-                "Outbox" => query.Where(m => m.SenderId == param.MemberId),
-                _ => query.Where(m => m.RecipientId == param.MemberId)
+                "Outbox" => query.Where(m => m.SenderId == param.MemberId && m.SenderDeleted == false),
+                _ => query.Where(m => m.RecipientId == param.MemberId && m.RecipientDeleted == false)
             };
             var messageQuery = query.Select(MessageExtension.ToDtoProjectio());
             return await PaginationHelper.CreateAsync(messageQuery, param.PageNumber, param.PageSize);
@@ -49,8 +49,8 @@ namespace DatingAppApi.Data
                 || m.DateRead == null)
                 .ExecuteUpdateAsync(m => m.SetProperty(m => m.DateRead, DateTime.UtcNow));
             return  await context.Messages
-                .Where(m => m.RecipientId == currentMemberId && m.SenderId == recipientId
-                ||(m.SenderId == currentMemberId && m.RecipientId == recipientId))
+                .Where(m => m.RecipientId == currentMemberId && m.RecipientDeleted == false && m.SenderId == recipientId
+                ||(m.SenderId == currentMemberId && m.SenderDeleted == false && m.RecipientId == recipientId))
                 .OrderBy(m => m.MessageSent)
                 .Select(MessageExtension.ToDtoProjectio())
                 .ToListAsync();
