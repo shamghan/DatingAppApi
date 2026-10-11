@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DatingApp.Controllers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -31,6 +32,12 @@ namespace DatingAppApi.Controllers
         public IActionResult GetBadRequest()
         {
             return BadRequest("This was not a good request");
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-secret")]
+        public async Task<ActionResult<string>> GetSecretAdmin()
+        {
+            return Ok("Only admin should see this");
         }
     }
 }
