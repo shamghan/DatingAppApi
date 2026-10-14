@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using DatingAppApi.Middleware;
 using DatingAppApi.Data;
 using DatingAppApi.Helpers;
+using DatingApp.Entities;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,13 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<LogUserActivity>();
 builder.Services.Configure<CaludinarySettings>(builder.Configuration.GetSection("CaludinarySettings"));
 
+builder.Services.AddIdentityCore<AppUser>(opt=>
+{
+    opt.Password.RequireNonAlphanumeric = false;
+    opt.User.RequireUniqueEmail = true;
+
+}).AddRoles<IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -40,6 +49,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false
         };
     });
+
+builder.Services.AddAuthorization(opt=>
+{
+    opt.AddPolicy("RequireAdminRole", policy=>policy.RequireRole("Admin"));
+    opt.AddPolicy("ModeratePhotoRole", policy=>policy.RequireRole("Admin", "Moderator"));
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -51,8 +66,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(options=>options.AllowAnyHeader()
+app.UseCors(options=>options
+        .AllowAnyHeader()
         .AllowAnyMethod()
+        .AllowCredentials()
         .WithOrigins("http://localhost:4200", " https://localhost:4200"));
 
 app.UseAuthentication();
@@ -65,8 +82,10 @@ var services = scope.ServiceProvider;
 try
 {
     var context = services.GetRequiredService<AppDbContext>();
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     await context.Database.MigrateAsync();
-    await Seed.SeedUser(context);
+    await Seed.SeedUsers(userManager, roleManager);
 }
 catch(System.Exception ex)
 {

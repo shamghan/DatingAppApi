@@ -1,11 +1,12 @@
 ﻿using DatingApp.Entities;
 using DatingAppApi.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DatingApp.Data
 {
-   public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+   public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
     {
         public DbSet<AppUser> Users { get; set; }
 
