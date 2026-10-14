@@ -90,7 +90,7 @@ namespace DatingApp.Controllers
             {
                 HttpOnly=true ,
                 Secure =true,
-                SameSite=SameSiteMode.Strict,
+                SameSite=Microsoft.AspNetCore.Http.SameSiteMode.Strict,
                 Expires=DateTime.UtcNow.AddDays(7),
 
             };
