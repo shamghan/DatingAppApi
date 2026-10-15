@@ -8,6 +8,7 @@ using DatingAppApi.Data;
 using DatingAppApi.Helpers;
 using DatingApp.Entities;
 using Microsoft.AspNetCore.Identity;
+using DatingAppApi.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +30,7 @@ builder.Services.AddScoped<ILikeRepository, LikesRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<LogUserActivity>();
 builder.Services.Configure<CaludinarySettings>(builder.Configuration.GetSection("CaludinarySettings"));
-
+builder.Services.AddSignalR();
 builder.Services.AddIdentityCore<AppUser>(opt=>
 {
     opt.Password.RequireNonAlphanumeric = false;
@@ -75,7 +76,7 @@ app.UseCors(options=>options
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
+app.MapHub<PresenceHub>("hubs/presence");
 using var scope = app.Services.CreateScope();
 
 var services = scope.ServiceProvider;
