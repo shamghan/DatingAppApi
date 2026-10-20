@@ -74,6 +74,7 @@ app.UseCors(options=>options
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 using var scope = app.Services.CreateScope();
