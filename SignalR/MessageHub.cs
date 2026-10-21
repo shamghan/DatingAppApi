@@ -50,10 +50,7 @@ namespace DatingAppApi.SignalR
             }
 
         }
-        public override async Task OnDisconnectedAsync(Exception? exception)
-        {
-            return base.OnDisconnectedAsync(exception);
-        }
+      
         private string GetUserId()
         {
             return Context.User?.GetMemberId() ?? throw new HubException("Can not get member id");
