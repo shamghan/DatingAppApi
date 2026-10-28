@@ -64,11 +64,6 @@ namespace DatingAppApi.Data
 
             return await PaginationHelper.CreateAsync(membersQuery, param.PageNumber, param.PageSize);
         }
-        
-
-        public async  Task<bool> SaveAllChanges()
-        {
-         return await context.SaveChangesAsync() > 0;
-        }
+       
     }
 }

@@ -18,10 +18,7 @@ namespace DatingAppApi.Data
         {
             context.Entry(member).State = EntityState.Modified;
         }
-        public async Task<bool> SaveAllAsync()
-        {
-            return await context.SaveChangesAsync() > 0;
-        }
+       
         public async Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams)
         {
             var query= context.Members.AsQueryable();// as  its IQueryable so it does not do  anything with database

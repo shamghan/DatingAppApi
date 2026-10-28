@@ -15,7 +15,6 @@ namespace DatingAppApi.Interfaces
         Task<Message?> GetMessage(string messageId);
         Task<PaginatedResult<MessageDto>> GetMessagesForMember(MessageParam param);
         Task<IReadOnlyList<MessageDto>> GetMessageThread(string currentMemberId, string recipientMemberId);
-        Task<bool> SaveAllChanges();
         void AddGroup(Group group);
         Task RemoveConnection(string connectionId);
         Task<Connection?> GetConnection(string connectionId);

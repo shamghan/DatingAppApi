@@ -5,6 +5,7 @@ using DatingAppApi.DTO;
 using DatingAppApi.Entities;
 using DatingAppApi.Extensions;
 using DatingAppApi.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -95,6 +96,17 @@ namespace DatingApp.Controllers
 
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<ActionResult> LogOut()
+        {
+            await context.Users.Where(x=>x.Id == User.GetMemberId())
+            .ExecuteUpdateAsync(setter =>setter.SetProperty(x=>x.RefreshToken, _ =>null)
+                                                .SetProperty(x=>x.RefreshTokenExpiry, _ =>null));
+
+            Response.Cookies.Delete("RefreshToken");
+            return Ok();
         }
 
     }
