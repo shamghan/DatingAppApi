@@ -13,7 +13,7 @@ using Microsoft.Extensions.Primitives;
 namespace DatingAppApi.SignalR
 {
     [Authorize]
-    public class MessageHub(IMessageRepository messageRepository, IMemberRepository memberRepository, IHubContext<PresenceHub> presenceHub) : Hub
+    public class MessageHub(IUnitOfWork unitOfWork, IHubContext<PresenceHub> presenceHub) : Hub
     {
         public override async Task OnConnectedAsync()
         {
@@ -23,31 +23,31 @@ namespace DatingAppApi.SignalR
             var groupName = GetGroupName(GetUserId(), otherUser);
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
             await AddToGroup(groupName);
-            var messages = await messageRepository.GetMessageThread(GetUserId(),otherUser);
+            var messages = await unitOfWork.messageRepository.GetMessageThread(GetUserId(),otherUser);
             await Clients.Group(groupName).SendAsync("ReceiveMessageThread", messages);
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await messageRepository.RemoveConnection(Context.ConnectionId);
+            await unitOfWork.messageRepository.RemoveConnection(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
         public async Task<bool> AddToGroup(string groupName)
         {
-            var group = await messageRepository.GetMessageGroup(groupName);
+            var group = await unitOfWork.messageRepository.GetMessageGroup(groupName);
             var connection =  new Connection(Context.ConnectionId, GetUserId());
             if(group == null)
             {
                 group = new Group(name:groupName);
-                messageRepository.AddGroup(group);
+                unitOfWork.messageRepository.AddGroup(group);
 
             }
             group.Connections.Add(connection);
-            return await messageRepository.SaveAllChanges();
+            return await unitOfWork.Complete();
         }
         public async Task SendMessage(CreateMessageDto createMessageDto)
         {
-             var sender = await memberRepository.GetMemberByIdAsync(GetUserId());
-            var recipient  =await memberRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
+             var sender = await unitOfWork.memberRepository.GetMemberByIdAsync(GetUserId());
+            var recipient  =await unitOfWork.memberRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
 
             if(recipient == null || sender == null || sender.Id == createMessageDto.RecipientId)
                 throw new HubException("Can not send message");
@@ -61,17 +61,17 @@ namespace DatingAppApi.SignalR
             };
             
             var groupName = GetGroupName(sender.Id,recipient.Id);
-            var group = await messageRepository.GetMessageGroup(groupName);
+            var group = await unitOfWork.messageRepository.GetMessageGroup(groupName);
             var userInGroup = group!=null && group.Connections.Any(x=>x.UserId == message.RecipientId);
             if(userInGroup)
             {
                 message.DateRead=DateTime.UtcNow;
             }
             
-            messageRepository.AddMessage(message);
+            unitOfWork.messageRepository.AddMessage(message);
 
-            if(await messageRepository.SaveAllChanges())
-            {
+            if(await unitOfWork.Complete())
+            {                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
                 await Clients.Group(groupName).SendAsync("NewMessage", message.ToDto());
                 var connections = await PresenceTracker.GetConnectionsForUser(recipient.Id);
                 if(connections != null && connections.Count>0 && !userInGroup)

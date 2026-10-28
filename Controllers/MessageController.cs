@@ -12,14 +12,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DatingAppApi.Controllers
 {
-    public class MessageController(IMessageRepository messageRepository,
-    IMemberRepository memberRepository) : BaseApiController
+    public class MessageController(IUnitOfWork unitOfWork) : BaseApiController
     {
         [HttpPost]
         public async Task<ActionResult<MessageDto>> CreateMessage(CreateMessageDto createMessageDto)
         {
-            var sender = await memberRepository.GetMemberByIdAsync(User.GetMemberId());
-            var recipient  =await memberRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
+            var sender = await unitOfWork.memberRepository.GetMemberByIdAsync(User.GetMemberId());
+            var recipient  =await unitOfWork.memberRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
 
             if(recipient == null || sender == null || sender.Id == createMessageDto.RecipientId)
                 return BadRequest("Cannot send this messsage");
@@ -31,9 +30,9 @@ namespace DatingAppApi.Controllers
                 Content = createMessageDto.Content,
                
             };
-            messageRepository.AddMessage(message);
+            unitOfWork.messageRepository.AddMessage(message);
 
-            if(await messageRepository.SaveAllChanges())
+            if(await unitOfWork.Complete())
                 return Ok(message.ToDto());
 
             return BadRequest("Failed to send message");   
@@ -42,19 +41,19 @@ namespace DatingAppApi.Controllers
         public async Task<ActionResult<PaginatedResult<MessageDto>>> GetMessageByIdAsync([FromQuery]MessageParam param)
         {
             param.MemberId = User.GetMemberId();
-            return await messageRepository.GetMessagesForMember(param);
+            return await unitOfWork.messageRepository.GetMessagesForMember(param);
         }
         [HttpGet("thread/{recipientId}")]
         public async Task<ActionResult<IReadOnlyList<MessageDto>>> GetMessageThread(string recipientId)
         {
             var currentMemberId = User.GetMemberId();
-            return Ok(await messageRepository.GetMessageThread(currentMemberId, recipientId));
+            return Ok(await unitOfWork.messageRepository.GetMessageThread(currentMemberId, recipientId));
         }
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMessage(string id)
         {
             var memberId = User.GetMemberId();
-            var message = await messageRepository.GetMessage(id);
+            var message = await unitOfWork.messageRepository.GetMessage(id);
 
             if(message == null)
                 return BadRequest("Can not delete this message");
@@ -66,9 +65,9 @@ namespace DatingAppApi.Controllers
             if(message.RecipientId == memberId) message.RecipientDeleted = true;
 
             if(message is {SenderDeleted: true, RecipientDeleted: true})
-                messageRepository.DeleteMessage(message);
+                unitOfWork.messageRepository.DeleteMessage(message);
 
-            if(await messageRepository.SaveAllChanges())
+            if(await unitOfWork.Complete())
                 return Ok();
 
             return BadRequest("Failed to delete the message");

@@ -10,14 +10,18 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace DatingAppApi.SignalR
 {
+    //user can know which users are online
     [Authorize]
     public class PresenceHub(PresenceTracker presenceTracker) :  Hub
     {
-
+        
         public override async Task OnConnectedAsync()
         {
             await presenceTracker.UserConnected(GetUserId(), Context.ConnectionId);
 
+            //Clients.Others- this is everybody else apart from the client that's connecting to this signal r hub
+            // we will send notifcation to others 
+            //UserOnline method client is going to listen for to recieve the notification that user is online
             await Clients.Others.SendAsync("UserOnline", GetUserId());
 
             var currrentUsers = await presenceTracker.GetOnlineUsers();
