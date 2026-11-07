@@ -19,7 +19,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(option=>
 {
-       option.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+       option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddCors();
