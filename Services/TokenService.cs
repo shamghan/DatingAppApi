@@ -33,7 +33,7 @@ namespace DatingAppApi.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(7),
+                Expires = DateTime.Now.AddDays(15),
                 SigningCredentials = creds
             };
             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
